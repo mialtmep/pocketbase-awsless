@@ -14,7 +14,6 @@ func bindSettingsApi(app core.App, rg *router.RouterGroup[*core.RequestEvent]) {
 	subGroup := rg.Group("/settings").Bind(RequireSuperuserAuth())
 	subGroup.GET("", settingsList)
 	subGroup.PATCH("", settingsSet)
-	subGroup.POST("/test/s3", settingsTestS3)
 	subGroup.POST("/test/email", settingsTestEmail)
 	subGroup.POST("/apple/generate-client-secret", settingsGenerateAppleClientSecret)
 }
@@ -67,28 +66,6 @@ func settingsSet(e *core.RequestEvent) error {
 
 		return e.JSON(http.StatusOK, appSettings)
 	})
-}
-
-func settingsTestS3(e *core.RequestEvent) error {
-	form := forms.NewTestS3Filesystem(e.App)
-
-	// load request
-	if err := e.BindBody(form); err != nil {
-		return e.BadRequestError("An error occurred while loading the submitted data.", err)
-	}
-
-	// send
-	if err := form.Submit(); err != nil {
-		// form error
-		if fErr, ok := err.(validation.Errors); ok {
-			return e.BadRequestError("Failed to test the S3 filesystem.", fErr)
-		}
-
-		// mailer error
-		return e.BadRequestError("Failed to test the S3 filesystem. Raw error: \n"+err.Error(), nil)
-	}
-
-	return e.NoContent(http.StatusNoContent)
 }
 
 func settingsTestEmail(e *core.RequestEvent) error {

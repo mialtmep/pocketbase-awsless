@@ -644,17 +644,6 @@ func (app *BaseApp) NewMailClient() mailer.Mailer {
 // NB! Make sure to call Close() on the returned result
 // after you are done working with it.
 func (app *BaseApp) NewFilesystem() (*filesystem.System, error) {
-	if app.settings != nil && app.settings.S3.Enabled {
-		return filesystem.NewS3(
-			app.settings.S3.Bucket,
-			app.settings.S3.Region,
-			app.settings.S3.Endpoint,
-			app.settings.S3.AccessKey,
-			app.settings.S3.Secret,
-			app.settings.S3.ForcePathStyle,
-		)
-	}
-
 	// fallback to local filesystem
 	return filesystem.NewLocal(filepath.Join(app.DataDir(), LocalStorageDirName))
 }
@@ -665,17 +654,6 @@ func (app *BaseApp) NewFilesystem() (*filesystem.System, error) {
 // NB! Make sure to call Close() on the returned result
 // after you are done working with it.
 func (app *BaseApp) NewBackupsFilesystem() (*filesystem.System, error) {
-	if app.settings != nil && app.settings.Backups.S3.Enabled {
-		return filesystem.NewS3(
-			app.settings.Backups.S3.Bucket,
-			app.settings.Backups.S3.Region,
-			app.settings.Backups.S3.Endpoint,
-			app.settings.Backups.S3.AccessKey,
-			app.settings.Backups.S3.Secret,
-			app.settings.Backups.S3.ForcePathStyle,
-		)
-	}
-
 	// fallback to local filesystem
 	return filesystem.NewLocal(filepath.Join(app.DataDir(), LocalBackupsDirName))
 }

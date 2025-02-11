@@ -203,15 +203,6 @@ func TestBaseAppNewFilesystem(t *testing.T) {
 		t.Fatal("Expected local filesystem instance, got nil")
 	}
 
-	// misconfigured s3
-	app.Settings().S3.Enabled = true
-	s3, s3Err := app.NewFilesystem()
-	if s3Err == nil {
-		t.Fatal("Expected S3 error, got nil")
-	}
-	if s3 != nil {
-		t.Fatalf("Expected nil s3 filesystem, got %v", s3)
-	}
 }
 
 func TestBaseAppNewBackupsFilesystem(t *testing.T) {
@@ -232,15 +223,6 @@ func TestBaseAppNewBackupsFilesystem(t *testing.T) {
 		t.Fatal("Expected local backups filesystem instance, got nil")
 	}
 
-	// misconfigured s3
-	app.Settings().Backups.S3.Enabled = true
-	s3, s3Err := app.NewBackupsFilesystem()
-	if s3Err == nil {
-		t.Fatal("Expected S3 error, got nil")
-	}
-	if s3 != nil {
-		t.Fatalf("Expected nil s3 backups filesystem, got %v", s3)
-	}
 }
 
 func TestBaseAppLoggerWrites(t *testing.T) {

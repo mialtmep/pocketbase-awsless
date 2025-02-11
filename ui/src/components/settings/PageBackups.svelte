@@ -12,7 +12,6 @@
     import RefreshButton from "@/components/base/RefreshButton.svelte";
     import SettingsSidebar from "@/components/settings/SettingsSidebar.svelte";
     import BackupsList from "@/components/settings/BackupsList.svelte";
-    import S3Fields from "@/components/settings/S3Fields.svelte";
     import BackupUploadButton from "@/components/settings/BackupUploadButton.svelte";
 
     $pageTitle = "Backups";
@@ -242,37 +241,8 @@
 
                     <div class="clearfix m-b-base" />
 
-                    <S3Fields
-                        toggleLabel="Store backups in S3 storage"
-                        testFilesystem="backups"
-                        configKey="backups.s3"
-                        originalConfig={originalFormSettings.backups?.s3}
-                        bind:config={formSettings.backups.s3}
-                        bind:isTesting
-                        bind:testError
-                    />
-
                     <div class="flex">
                         <div class="flex-fill" />
-
-                        {#if formSettings.backups?.s3?.enabled && !hasChanges && !isSaving}
-                            {#if isTesting}
-                                <span class="loader loader-sm" />
-                            {:else if testError}
-                                <div
-                                    class="label label-sm label-warning entrance-right"
-                                    use:tooltip={testError.data?.message}
-                                >
-                                    <i class="ri-error-warning-line txt-warning" />
-                                    <span class="txt">Failed to establish S3 connection</span>
-                                </div>
-                            {:else}
-                                <div class="label label-sm label-success entrance-right">
-                                    <i class="ri-checkbox-circle-line txt-success" />
-                                    <span class="txt">S3 connected successfully</span>
-                                </div>
-                            {/if}
-                        {/if}
 
                         {#if hasChanges}
                             <button

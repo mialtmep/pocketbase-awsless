@@ -14,19 +14,12 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/aws/aws-sdk-go-v2/aws"
-	"github.com/aws/aws-sdk-go-v2/config"
-	"github.com/aws/aws-sdk-go-v2/credentials"
-	"github.com/aws/aws-sdk-go-v2/service/s3"
 	"github.com/disintegration/imaging"
 	"github.com/gabriel-vasile/mimetype"
-	"github.com/pocketbase/pocketbase/tools/filesystem/internal/s3lite"
 	"github.com/pocketbase/pocketbase/tools/list"
 	"gocloud.dev/blob"
 	"gocloud.dev/blob/fileblob"
 	"gocloud.dev/gcerrors"
-
-	smithyhttp "github.com/aws/smithy-go/transport/http"
 )
 
 var gcpIgnoreHeaders = []string{"Accept-Encoding"}
@@ -40,90 +33,9 @@ type System struct {
 
 // -------------------------------------------------------------------
 
-var requestChecksumCalculation = aws.RequestChecksumCalculationWhenRequired
-var responseChecksumValidation = aws.ResponseChecksumValidationWhenRequired
-
 // @todo consider removing after the other non-AWS vendors catched up with the new changes
 // (https://github.com/aws/aws-sdk-go-v2/discussions/2960)
 func init() {
-	reqEnv := os.Getenv("AWS_REQUEST_CHECKSUM_CALCULATION")
-	if reqEnv != "" && strings.EqualFold(reqEnv, "when_supported") {
-		requestChecksumCalculation = aws.RequestChecksumCalculationWhenSupported
-	}
-
-	resEnv := os.Getenv("AWS_RESPONSE_CHECKSUM_VALIDATION")
-	if resEnv != "" && strings.EqualFold(resEnv, "when_supported") {
-		responseChecksumValidation = aws.ResponseChecksumValidationWhenSupported
-	}
-}
-
-// -------------------------------------------------------------------
-
-// NewS3 initializes an S3 filesystem instance.
-//
-// NB! Make sure to call `Close()` after you are done working with it.
-func NewS3(
-	bucketName string,
-	region string,
-	endpoint string,
-	accessKey string,
-	secretKey string,
-	s3ForcePathStyle bool,
-) (*System, error) {
-	ctx := context.Background() // default context
-
-	cred := credentials.NewStaticCredentialsProvider(accessKey, secretKey, "")
-
-	cfg, err := config.LoadDefaultConfig(
-		ctx,
-		config.WithCredentialsProvider(cred),
-		config.WithRegion(region),
-	)
-	if err != nil {
-		return nil, err
-	}
-
-	cfg.RequestChecksumCalculation = requestChecksumCalculation
-	cfg.ResponseChecksumValidation = responseChecksumValidation
-
-	client := s3.NewFromConfig(cfg, func(o *s3.Options) {
-		// ensure that the endpoint has url scheme for
-		// backward compatibility with v1 of the aws sdk
-		if !strings.Contains(endpoint, "://") {
-			endpoint = "https://" + endpoint
-		}
-		o.BaseEndpoint = aws.String(endpoint)
-
-		o.UsePathStyle = s3ForcePathStyle
-
-		if strings.Contains(endpoint, "storage.googleapis.com") {
-			// Google Cloud Storage alters the Accept-Encoding header,
-			// which breaks the v2 request signature
-			// (https://github.com/aws/aws-sdk-go-v2/issues/1816)
-			ignoreSigningHeaders(o, gcpIgnoreHeaders)
-		} else if strings.Contains(endpoint, "backblazeb2.com") {
-			// Backblaze currently doesn't support the new sdk's checksum headers
-			// (https://www.backblaze.com/docs/cloud-storage-s3-compatible-api#unsupported-features)
-			o.RequestChecksumCalculation = aws.RequestChecksumCalculationUnset
-			o.APIOptions = append(o.APIOptions,
-				smithyhttp.SetHeaderValue("x-amz-checksum-crc32", ""),
-				smithyhttp.SetHeaderValue("x-amz-checksum-crc32c", ""),
-				smithyhttp.SetHeaderValue("x-amz-checksum-crc64nvme", ""),
-				smithyhttp.SetHeaderValue("x-amz-checksum-sha1", ""),
-				smithyhttp.SetHeaderValue("x-amz-checksum-sha256", ""),
-				smithyhttp.SetHeaderValue("x-amz-checksum-mode", ""),
-				smithyhttp.SetHeaderValue("x-amz-checksum-algorithm", ""),
-				smithyhttp.SetHeaderValue("x-amz-sdk-checksum-algorithm", ""),
-			)
-		}
-	})
-
-	bucket, err := s3lite.OpenBucketV2(ctx, client, bucketName, nil)
-	if err != nil {
-		return nil, err
-	}
-
-	return &System{ctx: ctx, bucket: bucket}, nil
 }
 
 // NewLocal initializes a new local filesystem instance.

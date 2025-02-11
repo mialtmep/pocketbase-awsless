@@ -8,7 +8,6 @@
     import tooltip from "@/actions/tooltip";
     import PageWrapper from "@/components/base/PageWrapper.svelte";
     import SettingsSidebar from "@/components/settings/SettingsSidebar.svelte";
-    import S3Fields from "@/components/settings/S3Fields.svelte";
 
     $pageTitle = "Files storage";
 
@@ -103,58 +102,6 @@
             {#if isLoading}
                 <div class="loader" />
             {:else}
-                <S3Fields
-                    toggleLabel="Use S3 storage"
-                    originalConfig={originalFormSettings.s3}
-                    bind:config={formSettings.s3}
-                    bind:isTesting
-                    bind:testError
-                >
-                    {#if originalFormSettings.s3?.enabled != formSettings.s3.enabled}
-                        <div transition:slide={{ duration: 150 }}>
-                            <div class="alert alert-warning m-0">
-                                <div class="icon">
-                                    <i class="ri-error-warning-line" />
-                                </div>
-                                <div class="content">
-                                    If you have existing uploaded files, you'll have to migrate them manually
-                                    from the
-                                    <strong>
-                                        {originalFormSettings.s3?.enabled
-                                            ? "S3 storage"
-                                            : "local file system"}
-                                    </strong>
-                                    to the
-                                    <strong
-                                        >{formSettings.s3.enabled
-                                            ? "S3 storage"
-                                            : "local file system"}</strong
-                                    >.
-                                    <br />
-                                    There are numerous command line tools that can help you, such as:
-                                    <a
-                                        href="https://github.com/rclone/rclone"
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        class="txt-bold"
-                                    >
-                                        rclone
-                                    </a>,
-                                    <a
-                                        href="https://github.com/peak/s5cmd"
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        class="txt-bold"
-                                    >
-                                        s5cmd
-                                    </a>, etc.
-                                </div>
-                            </div>
-                            <div class="clearfix m-t-base" />
-                        </div>
-                    {/if}
-                </S3Fields>
-
                 <div class="flex">
                     <div class="flex-fill" />
 
