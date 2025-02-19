@@ -1,4 +1,4 @@
-module github.com/pocketbase/pocketbase
+module github.com/mialtmep/pocketbase-awsless
 
 go 1.23
 
